@@ -1,0 +1,226 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
+import { useOrders } from "@/hooks/use-orders";
+import { getEarnings } from "@/lib/firestore";
+import { Star, IndianRupee, Truck, TrendingUp } from "lucide-react";
+import type { Earnings } from "@shared/schema";
+
+type FilterPeriod = "today" | "week" | "month";
+
+export default function History() {
+  const { deliveryPartner } = useAuth();
+  const { deliveryHistory, loadDeliveryHistory } = useOrders(deliveryPartner?.id);
+  const [activeFilter, setActiveFilter] = useState<FilterPeriod>("today");
+  const [earnings, setEarnings] = useState<Earnings[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Calculate period dates
+  const getPeriodDates = (period: FilterPeriod) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    switch (period) {
+      case "today":
+        return { start: today, end: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
+      case "week":
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        return { start: weekStart, end: new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000) };
+      case "month":
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        return { start: monthStart, end: new Date(today.getFullYear(), today.getMonth() + 1, 1) };
+      default:
+        return { start: today, end: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
+    }
+  };
+
+  // Load data when filter changes
+  useEffect(() => {
+    if (!deliveryPartner) return;
+
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const { start, end } = getPeriodDates(activeFilter);
+        const [_, earningsData] = await Promise.all([
+          loadDeliveryHistory(deliveryPartner.id),
+          getEarnings(deliveryPartner.id, start, end)
+        ]);
+        setEarnings(earningsData);
+      } catch (error) {
+        console.error("Failed to load history:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [deliveryPartner, activeFilter, loadDeliveryHistory]);
+
+  // Calculate summary stats
+  const totalEarnings = earnings.reduce((sum, earning) => sum + earning.amount, 0);
+  const totalDeliveries = deliveryHistory.length;
+  const averageRating = deliveryHistory.length > 0
+    ? deliveryHistory.reduce((sum, order) => sum + (order.customerRating || 0), 0) / deliveryHistory.length
+    : 0;
+
+  const filteredHistory = deliveryHistory.filter(order => {
+    if (!order.deliveryTime) return false;
+    const { start, end } = getPeriodDates(activeFilter);
+    return order.deliveryTime >= start && order.deliveryTime < end;
+  });
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-IN', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const getTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Less than an hour ago";
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+  };
+
+  if (!deliveryPartner) {
+    return (
+      <div className="p-4">
+        <div className="text-center text-muted-foreground">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 space-y-4 pb-24">
+      {/* Earnings Summary */}
+      <div className="bg-gradient-to-r from-primary to-orange-600 text-white p-6 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">
+          {activeFilter === "today" ? "Today's" : activeFilter === "week" ? "Weekly" : "Monthly"} Summary
+        </h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold" data-testid="text-total-earnings">
+              ₹{totalEarnings}
+            </p>
+            <p className="text-sm opacity-90">Total Earned</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold" data-testid="text-total-deliveries">
+              {filteredHistory.length}
+            </p>
+            <p className="text-sm opacity-90">Deliveries</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold" data-testid="text-average-rating">
+              {averageRating.toFixed(1)}
+            </p>
+            <p className="text-sm opacity-90">Rating</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <Card>
+        <CardContent className="p-1">
+          <div className="flex rounded-lg">
+            {(["today", "week", "month"] as FilterPeriod[]).map((period) => (
+              <Button
+                key={period}
+                variant={activeFilter === period ? "default" : "ghost"}
+                size="sm"
+                className="flex-1 capitalize"
+                onClick={() => setActiveFilter(period)}
+                data-testid={`filter-${period}`}
+              >
+                {period}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delivery History List */}
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold text-card-foreground">Delivery History</h3>
+        
+        {loading ? (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+              <p className="text-muted-foreground">Loading history...</p>
+            </CardContent>
+          </Card>
+        ) : filteredHistory.length === 0 ? (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Truck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                No deliveries found for the selected period
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredHistory.map((order) => (
+            <Card key={order.id} data-testid={`card-history-${order.id}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-success text-white">
+                      DELIVERED
+                    </Badge>
+                    <span className="text-sm font-medium text-card-foreground">
+                      #{order.id.slice(-8)}
+                    </span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {order.deliveryTime ? getTimeAgo(order.deliveryTime) : "Unknown"}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-card-foreground" data-testid={`text-customer-${order.id}`}>
+                      {order.customerName}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Delivered to {order.customerAddress.split(',')[0]}
+                    </p>
+                    {order.deliveryTime && (
+                      <p className="text-xs text-muted-foreground">
+                        Completed at {formatTime(order.deliveryTime)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-success" data-testid={`text-earnings-${order.id}`}>
+                      ₹{order.deliveryFee}
+                    </p>
+                    {order.customerRating && (
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-3 h-3 text-warning fill-current" />
+                        <span className="text-xs text-muted-foreground">
+                          {order.customerRating.toFixed(1)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

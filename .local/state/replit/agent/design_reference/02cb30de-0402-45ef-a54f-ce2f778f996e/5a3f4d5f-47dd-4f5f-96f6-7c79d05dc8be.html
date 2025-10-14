@@ -1,0 +1,734 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolpur Mart Delivery</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FF6B35">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    success: "var(--success)",
+                    warning: "var(--warning)",
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                }
+            }
+        }
+    };
+    </script>
+    
+    <style>
+        :root {
+            --background: hsl(0 0% 96%);
+            --foreground: hsl(222 47% 11%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(222 47% 11%);
+            --primary: hsl(14 100% 60%);
+            --primary-foreground: hsl(0 0% 100%);
+            --secondary: hsl(207 90% 54%);
+            --secondary-foreground: hsl(0 0% 100%);
+            --muted: hsl(214 32% 91%);
+            --muted-foreground: hsl(215 16% 47%);
+            --accent: hsl(210 40% 98%);
+            --accent-foreground: hsl(222 47% 11%);
+            --destructive: hsl(0 85% 60%);
+            --destructive-foreground: hsl(0 0% 100%);
+            --success: hsl(122 39% 49%);
+            --warning: hsl(45 100% 51%);
+            --border: hsl(214 32% 91%);
+            --input: hsl(214 32% 91%);
+            --ring: hsl(14 100% 60%);
+            --radius: 8px;
+        }
+        
+        .dark {
+            --background: hsl(224 71% 4%);
+            --foreground: hsl(213 31% 91%);
+            --card: hsl(224 71% 4%);
+            --card-foreground: hsl(213 31% 91%);
+            --primary: hsl(14 100% 60%);
+            --primary-foreground: hsl(0 0% 100%);
+            --secondary: hsl(207 90% 54%);
+            --secondary-foreground: hsl(0 0% 100%);
+            --muted: hsl(223 47% 11%);
+            --muted-foreground: hsl(215 16% 57%);
+            --accent: hsl(216 34% 17%);
+            --accent-foreground: hsl(210 40% 98%);
+            --destructive: hsl(0 63% 31%);
+            --destructive-foreground: hsl(210 40% 98%);
+            --success: hsl(122 39% 49%);
+            --warning: hsl(45 100% 51%);
+            --border: hsl(216 34% 17%);
+            --input: hsl(216 34% 17%);
+            --ring: hsl(14 100% 60%);
+        }
+        
+        .status-new { background-color: hsl(207 90% 54%); }
+        .status-accepted { background-color: hsl(45 100% 51%); }
+        .status-picked { background-color: hsl(262 83% 58%); }
+        .status-delivered { background-color: hsl(122 39% 49%); }
+        
+        .fab-shadow {
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3);
+        }
+        
+        .offline-banner {
+            background: linear-gradient(90deg, hsl(0 85% 60%), hsl(14 100% 60%));
+        }
+        
+        @media (display-mode: standalone) {
+            .pwa-only { display: block; }
+        }
+        
+        .pwa-only { display: none; }
+    </style>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-background text-foreground min-h-screen">
+    <!-- @COMPONENT: App [main app container] -->
+    <div id="app" class="relative">
+        
+        <!-- Offline Banner -->
+        <!-- @COMPONENT: OfflineBanner [shows when offline] -->
+        <div id="offline-banner" class="offline-banner text-white p-2 text-center text-sm font-medium hidden">
+            <i class="fas fa-wifi-slash mr-2"></i>
+            You're offline. Some features may be limited.
+        </div>
+        <!-- @END_COMPONENT: OfflineBanner -->
+        
+        <!-- PWA Install Banner -->
+        <!-- @COMPONENT: InstallBanner [PWA install prompt] -->
+        <div id="install-banner" class="bg-primary text-primary-foreground p-3 hidden">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-download mr-3"></i>
+                    <span class="text-sm font-medium">Install Bolpur Mart Delivery</span>
+                </div>
+                <button class="bg-white bg-opacity-20 px-3 py-1 rounded text-sm font-medium">
+                    Install
+                </button>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: InstallBanner -->
+
+        <!-- Login Screen -->
+        <!-- @COMPONENT: LoginScreen [authentication interface] -->
+        <div id="login-screen" class="min-h-screen bg-gradient-to-b from-primary to-orange-600 flex items-center justify-center p-6">
+            <div class="bg-card rounded-lg shadow-xl p-8 w-full max-w-sm">
+                <div class="text-center mb-8">
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-truck text-2xl text-primary-foreground"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-card-foreground">Bolpur Mart</h1>
+                    <p class="text-muted-foreground">Delivery Partner</p>
+                </div>
+                
+                <form class="space-y-4" data-implementation="Firebase Auth integration">
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-card-foreground">Phone Number</label>
+                        <input type="tel" placeholder="+91 9876543210" 
+                               class="w-full p-3 border border-border rounded-md bg-input text-foreground focus:ring-2 focus:ring-ring focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-card-foreground">Password</label>
+                        <input type="password" placeholder="Enter your password"
+                               class="w-full p-3 border border-border rounded-md bg-input text-foreground focus:ring-2 focus:ring-ring focus:border-transparent">
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-primary-foreground p-3 rounded-md font-medium hover:opacity-90 transition-opacity">
+                        Sign In
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <a href="#" class="text-primary text-sm">Forgot Password?</a>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-border text-center">
+                    <p class="text-sm text-muted-foreground">New delivery partner?</p>
+                    <a href="#" class="text-primary font-medium">Apply Now</a>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: LoginScreen -->
+
+        <!-- Main App Content -->
+        <!-- @COMPONENT: MainApp [authenticated app interface] -->
+        <div id="main-app" class="hidden min-h-screen pb-20">
+            
+            <!-- Header -->
+            <!-- @COMPONENT: AppHeader [top navigation and status] -->
+            <header class="bg-card shadow-sm border-b border-border sticky top-0 z-40">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <span class="text-primary-foreground font-bold" data-bind="user.initials">RM</span>
+                        </div>
+                        <div>
+                            <h2 class="font-semibold text-card-foreground" data-bind="user.name">Rahul Mandal</h2>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-success rounded-full"></div>
+                                <span class="text-sm text-muted-foreground">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="p-2 hover:bg-accent rounded-full" data-event="click:toggleNotifications">
+                            <i class="fas fa-bell text-muted-foreground"></i>
+                            <span class="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full text-xs"></span>
+                        </button>
+                        <button class="p-2 hover:bg-accent rounded-full" data-event="click:openSettings">
+                            <i class="fas fa-cog text-muted-foreground"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <!-- @END_COMPONENT: AppHeader -->
+
+            <!-- Tab Content -->
+            <div class="p-4">
+                
+                <!-- Dashboard Tab Content -->
+                <!-- @COMPONENT: DashboardTab [main dashboard with active orders] -->
+                <div id="dashboard-tab" class="space-y-4">
+                    
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-card p-4 rounded-lg shadow-sm border border-border">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Today's Earnings</p>
+                                    <p class="text-xl font-bold text-card-foreground" data-bind="earnings.today">₹450</p>
+                                </div>
+                                <div class="w-10 h-10 bg-success bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-rupee-sign text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-card p-4 rounded-lg shadow-sm border border-border">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Deliveries</p>
+                                    <p class="text-xl font-bold text-card-foreground" data-bind="deliveries.today">12</p>
+                                </div>
+                                <div class="w-10 h-10 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-truck text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Orders Section -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-card-foreground">Active Orders</h3>
+                            <span class="text-sm text-muted-foreground" data-bind="activeOrders.count">3 pending</span>
+                        </div>
+                        
+                        <!-- @MAP: activeOrders.map(order => ( -->
+                        <!-- New Order Card -->
+                        <div class="bg-card rounded-lg shadow-sm border border-border mb-4 overflow-hidden">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="status-new text-white text-xs px-2 py-1 rounded-full font-medium">NEW</span>
+                                        <span class="text-sm font-medium text-card-foreground" data-bind="order.id">#BM2024001</span>
+                                    </div>
+                                    <span class="text-sm text-muted-foreground" data-bind="order.time">2 min ago</span>
+                                </div>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-destructive bg-opacity-10 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-store text-destructive text-xs"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-card-foreground" data-bind="order.store.name">Fresh Mart Store</p>
+                                            <p class="text-sm text-muted-foreground" data-bind="order.store.address">123 Main St, Bolpur</p>
+                                        </div>
+                                        <span class="text-sm font-medium text-card-foreground" data-bind="order.distance">1.2 km</span>
+                                    </div>
+                                    
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-success bg-opacity-10 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-map-marker-alt text-success text-xs"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-card-foreground" data-bind="order.customer.name">Priya Sharma</p>
+                                            <p class="text-sm text-muted-foreground" data-bind="order.customer.address">456 Garden Road, Bolpur</p>
+                                        </div>
+                                        <span class="text-sm font-medium text-card-foreground" data-bind="order.deliveryDistance">2.1 km</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                                    <div>
+                                        <p class="text-sm text-muted-foreground">Order Value</p>
+                                        <p class="font-semibold text-card-foreground" data-bind="order.value">₹245</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-muted-foreground">Delivery Fee</p>
+                                        <p class="font-semibold text-success" data-bind="order.deliveryFee">₹25</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="px-4 py-2 border border-border rounded-md text-sm font-medium text-card-foreground hover:bg-accent">
+                                            Decline
+                                        </button>
+                                        <button class="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90">
+                                            Accept
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accepted Order Card -->
+                        <div class="bg-card rounded-lg shadow-sm border border-border mb-4 overflow-hidden">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="status-accepted text-white text-xs px-2 py-1 rounded-full font-medium">PICKUP</span>
+                                        <span class="text-sm font-medium text-card-foreground">#BM2024002</span>
+                                    </div>
+                                    <span class="text-sm text-muted-foreground">5 min ago</span>
+                                </div>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-warning bg-opacity-10 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-store text-warning text-xs"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-card-foreground">Organic Vegetables</p>
+                                            <p class="text-sm text-muted-foreground">789 Park Avenue, Bolpur</p>
+                                        </div>
+                                        <button class="p-2 bg-primary text-primary-foreground rounded-full">
+                                            <i class="fas fa-navigation text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-2 mt-4">
+                                    <button class="flex-1 bg-warning text-white p-3 rounded-md font-medium">
+                                        <i class="fas fa-box mr-2"></i>
+                                        Mark as Picked Up
+                                    </button>
+                                    <button class="p-3 border border-border rounded-md">
+                                        <i class="fas fa-phone text-muted-foreground"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- En Route Order Card -->
+                        <div class="bg-card rounded-lg shadow-sm border border-border mb-4 overflow-hidden">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="status-picked text-white text-xs px-2 py-1 rounded-full font-medium">EN ROUTE</span>
+                                        <span class="text-sm font-medium text-card-foreground">#BM2024003</span>
+                                    </div>
+                                    <span class="text-sm text-muted-foreground">12 min ago</span>
+                                </div>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-success bg-opacity-10 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-map-marker-alt text-success text-xs"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-card-foreground">Amit Kumar</p>
+                                            <p class="text-sm text-muted-foreground">321 Lake View, Bolpur</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-muted-foreground">ETA</p>
+                                            <p class="font-medium text-card-foreground">8 min</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-2 mt-4">
+                                    <button class="flex-1 bg-success text-white p-3 rounded-md font-medium">
+                                        <i class="fas fa-check mr-2"></i>
+                                        Mark as Delivered
+                                    </button>
+                                    <button class="p-3 border border-border rounded-md">
+                                        <i class="fas fa-phone text-muted-foreground"></i>
+                                    </button>
+                                    <button class="p-3 border border-border rounded-md">
+                                        <i class="fas fa-comment text-muted-foreground"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: DashboardTab -->
+
+                <!-- History Tab Content -->
+                <!-- @COMPONENT: HistoryTab [delivery history and earnings] -->
+                <div id="history-tab" class="space-y-4 hidden">
+                    
+                    <!-- Earnings Summary -->
+                    <div class="bg-gradient-to-r from-primary to-orange-600 text-white p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-4">Weekly Summary</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold" data-bind="earnings.week">₹2,450</p>
+                                <p class="text-sm opacity-90">Total Earned</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold" data-bind="deliveries.week">47</p>
+                                <p class="text-sm opacity-90">Deliveries</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold" data-bind="rating.average">4.8</p>
+                                <p class="text-sm opacity-90">Rating</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="flex bg-card rounded-lg p-1 shadow-sm border border-border">
+                        <button class="flex-1 py-2 px-3 bg-primary text-primary-foreground rounded-md text-sm font-medium">Today</button>
+                        <button class="flex-1 py-2 px-3 text-muted-foreground text-sm font-medium">Week</button>
+                        <button class="flex-1 py-2 px-3 text-muted-foreground text-sm font-medium">Month</button>
+                    </div>
+
+                    <!-- Delivery History List -->
+                    <div class="space-y-3">
+                        <!-- @MAP: deliveryHistory.map(delivery => ( -->
+                        <div class="bg-card p-4 rounded-lg shadow-sm border border-border">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="status-delivered text-white text-xs px-2 py-1 rounded-full font-medium">DELIVERED</span>
+                                    <span class="text-sm font-medium text-card-foreground">#BM2024004</span>
+                                </div>
+                                <span class="text-sm text-muted-foreground">2 hours ago</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-card-foreground">Sneha Banerjee</p>
+                                    <p class="text-sm text-muted-foreground">Delivered to Salt Lake, Kolkata</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-success">₹35</p>
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-star text-warning text-xs"></i>
+                                        <span class="text-xs text-muted-foreground">4.9</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-card p-4 rounded-lg shadow-sm border border-border">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="status-delivered text-white text-xs px-2 py-1 rounded-full font-medium">DELIVERED</span>
+                                    <span class="text-sm font-medium text-card-foreground">#BM2024005</span>
+                                </div>
+                                <span class="text-sm text-muted-foreground">3 hours ago</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-card-foreground">Rajesh Singh</p>
+                                    <p class="text-sm text-muted-foreground">Delivered to New Town, Kolkata</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-success">₹28</p>
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-star text-warning text-xs"></i>
+                                        <span class="text-xs text-muted-foreground">5.0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: HistoryTab -->
+
+                <!-- Profile Tab Content -->
+                <!-- @COMPONENT: ProfileTab [user profile and settings] -->
+                <div id="profile-tab" class="space-y-4 hidden">
+                    
+                    <!-- Profile Header -->
+                    <div class="bg-card p-6 rounded-lg shadow-sm border border-border text-center">
+                        <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-primary-foreground">RM</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-card-foreground mb-1">Rahul Mandal</h3>
+                        <p class="text-muted-foreground mb-2">Delivery Partner • ID: DP2024001</p>
+                        <div class="flex items-center justify-center space-x-4 text-sm">
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-star text-warning"></i>
+                                <span>4.8 Rating</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-truck text-primary"></i>
+                                <span>247 Deliveries</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="space-y-3">
+                        <button class="w-full bg-card p-4 rounded-lg shadow-sm border border-border flex items-center justify-between hover:bg-accent">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                                <span class="font-medium text-card-foreground">Edit Profile</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted-foreground"></i>
+                        </button>
+
+                        <button class="w-full bg-card p-4 rounded-lg shadow-sm border border-border flex items-center justify-between hover:bg-accent">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-secondary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-motorcycle text-secondary"></i>
+                                </div>
+                                <span class="font-medium text-card-foreground">Vehicle Details</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted-foreground"></i>
+                        </button>
+
+                        <button class="w-full bg-card p-4 rounded-lg shadow-sm border border-border flex items-center justify-between hover:bg-accent">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-success bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-credit-card text-success"></i>
+                                </div>
+                                <span class="font-medium text-card-foreground">Payment Settings</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted-foreground"></i>
+                        </button>
+
+                        <button class="w-full bg-card p-4 rounded-lg shadow-sm border border-border flex items-center justify-between hover:bg-accent">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-warning bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-bell text-warning"></i>
+                                </div>
+                                <span class="font-medium text-card-foreground">Notifications</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted-foreground"></i>
+                        </button>
+
+                        <button class="w-full bg-card p-4 rounded-lg shadow-sm border border-border flex items-center justify-between hover:bg-accent">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-headset text-muted-foreground"></i>
+                                </div>
+                                <span class="font-medium text-card-foreground">Help & Support</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted-foreground"></i>
+                        </button>
+
+                        <button class="w-full bg-card p-4 rounded-lg shadow-sm border border-border flex items-center justify-between hover:bg-accent">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-destructive bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-sign-out-alt text-destructive"></i>
+                                </div>
+                                <span class="font-medium text-card-foreground">Sign Out</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted-foreground"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ProfileTab -->
+            </div>
+        </div>
+        <!-- @END_COMPONENT: MainApp -->
+
+        <!-- Bottom Navigation -->
+        <!-- @COMPONENT: BottomNavigation [main navigation tabs] -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 hidden" id="bottom-nav">
+            <div class="flex">
+                <button class="flex-1 py-3 px-2 text-center bg-primary text-primary-foreground" data-tab="dashboard">
+                    <i class="fas fa-home text-lg mb-1 block"></i>
+                    <span class="text-xs font-medium">Dashboard</span>
+                </button>
+                <button class="flex-1 py-3 px-2 text-center text-muted-foreground hover:text-foreground" data-tab="history">
+                    <i class="fas fa-history text-lg mb-1 block"></i>
+                    <span class="text-xs font-medium">History</span>
+                </button>
+                <button class="flex-1 py-3 px-2 text-center text-muted-foreground hover:text-foreground" data-tab="profile">
+                    <i class="fas fa-user text-lg mb-1 block"></i>
+                    <span class="text-xs font-medium">Profile</span>
+                </button>
+            </div>
+        </nav>
+        <!-- @END_COMPONENT: BottomNavigation -->
+
+        <!-- Floating Action Button -->
+        <!-- @COMPONENT: FAB [floating action button for online/offline toggle] -->
+        <button id="status-fab" class="fixed bottom-24 right-4 w-14 h-14 bg-success text-white rounded-full fab-shadow flex items-center justify-center hidden" data-implementation="Toggle online/offline status">
+            <i class="fas fa-power-off text-lg"></i>
+        </button>
+        <!-- @END_COMPONENT: FAB -->
+
+        <!-- Loading Overlay -->
+        <!-- @COMPONENT: LoadingOverlay [loading states] -->
+        <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-card p-6 rounded-lg shadow-xl text-center">
+                <div class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p class="text-card-foreground font-medium">Processing...</p>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: LoadingOverlay -->
+    </div>
+    <!-- @END_COMPONENT: App -->
+
+    <script>
+        (function() {
+            // TODO: Implement Firebase authentication, Firestore real-time updates, FCM for notifications
+            
+            // PWA Installation
+            let deferredPrompt;
+            const installBanner = document.getElementById('install-banner');
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBanner.classList.remove('hidden');
+            });
+
+            // Tab Navigation
+            const tabs = document.querySelectorAll('[data-tab]');
+            const tabContents = {
+                'dashboard': document.getElementById('dashboard-tab'),
+                'history': document.getElementById('history-tab'),
+                'profile': document.getElementById('profile-tab')
+            };
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.dataset.tab;
+                    
+                    // Update tab appearance
+                    tabs.forEach(t => {
+                        t.classList.remove('bg-primary', 'text-primary-foreground');
+                        t.classList.add('text-muted-foreground');
+                    });
+                    tab.classList.add('bg-primary', 'text-primary-foreground');
+                    tab.classList.remove('text-muted-foreground');
+                    
+                    // Show/hide content
+                    Object.values(tabContents).forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    tabContents[targetTab].classList.remove('hidden');
+                });
+            });
+
+            // App Navigation
+            function showLoginScreen() {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+                document.getElementById('bottom-nav').classList.add('hidden');
+                document.getElementById('status-fab').classList.add('hidden');
+            }
+
+            function showMainApp() {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('bottom-nav').classList.remove('hidden');
+                document.getElementById('status-fab').classList.remove('hidden');
+            }
+
+            // Simulate login for demo
+            document.querySelector('form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                document.getElementById('loading-overlay').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    showMainApp();
+                }, 2000);
+            });
+
+            // Online/Offline Status
+            function updateOnlineStatus() {
+                const offlineBanner = document.getElementById('offline-banner');
+                const statusFab = document.getElementById('status-fab');
+                
+                if (!navigator.onLine) {
+                    offlineBanner.classList.remove('hidden');
+                    statusFab.classList.remove('bg-success');
+                    statusFab.classList.add('bg-destructive');
+                } else {
+                    offlineBanner.classList.add('hidden');
+                    statusFab.classList.remove('bg-destructive');
+                    statusFab.classList.add('bg-success');
+                }
+            }
+
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+
+            // Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then((registration) => {
+                            console.log('SW registered: ', registration);
+                        })
+                        .catch((registrationError) => {
+                            console.log('SW registration failed: ', registrationError);
+                        });
+                });
+            }
+
+            // Mock notification permission
+            if ('Notification' in window && navigator.serviceWorker) {
+                Notification.requestPermission();
+            }
+
+            // Initialize app
+            showLoginScreen();
+        })();
+    </script>
+</body>
+</html>
