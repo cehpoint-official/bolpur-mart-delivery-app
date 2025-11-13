@@ -87,33 +87,45 @@ export default function Profile() {
   ];
 
   return (
-    <div className="p-4 space-y-4 pb-24">
+    <div className="p-4 space-y-5 pb-24 animate-fade-in">
       {/* Profile Header */}
-      <Card>
-        <CardContent className="p-6 text-center">
-          <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl font-bold text-primary-foreground">
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <div className="h-24 bg-gradient-to-r from-primary to-orange-600 relative">
+          <div className="absolute inset-0 bg-black/10" />
+        </div>
+        <CardContent className="p-6 -mt-12 relative">
+          <div className="w-24 h-24 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-white">
+            <span className="text-3xl font-bold text-white">
               {deliveryPartner.name.split(' ').map(n => n[0]).join('')}
             </span>
           </div>
-          <h3 className="text-xl font-semibold text-card-foreground mb-1" data-testid="text-profile-name">
-            {deliveryPartner.name}
-          </h3>
-          <p className="text-muted-foreground mb-2">
-            Delivery Partner • ID: {deliveryPartner.id.slice(-8)}
-          </p>
-          <div className="flex items-center justify-center space-x-4 text-sm">
-            <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 text-warning fill-current" />
-              <span data-testid="text-profile-rating">
-                {deliveryPartner.rating.toFixed(1)} Rating
-              </span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Truck className="w-4 h-4 text-primary" />
-              <span data-testid="text-profile-deliveries">
-                {deliveryPartner.totalDeliveries} Deliveries
-              </span>
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-foreground mb-1" data-testid="text-profile-name">
+              {deliveryPartner.name}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Delivery Partner • ID: {deliveryPartner.id.slice(-8)}
+            </p>
+            <div className="flex items-center justify-center gap-6">
+              <div className="text-center">
+                <div className="flex items-center gap-1 justify-center mb-1">
+                  <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                  <span className="text-xl font-bold" data-testid="text-profile-rating">
+                    {deliveryPartner.rating.toFixed(1)}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">Rating</p>
+              </div>
+              <div className="h-12 w-px bg-border" />
+              <div className="text-center">
+                <div className="flex items-center gap-1 justify-center mb-1">
+                  <Truck className="w-5 h-5 text-primary" />
+                  <span className="text-xl font-bold" data-testid="text-profile-deliveries">
+                    {deliveryPartner.totalDeliveries}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">Deliveries</p>
+              </div>
             </div>
           </div>
         </CardContent>

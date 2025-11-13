@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Truck } from "lucide-react";
 import Signup from "@/components/signup";
 
 export default function LoginPage() {
@@ -29,25 +30,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">🚚</span>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-orange-50 to-primary/5 p-4">
+      <Card className="w-full max-w-md shadow-xl border-0 animate-fade-in">
+        <CardHeader className="text-center pb-6">
+          <div className="w-20 h-20 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transform hover:scale-105 transition-transform">
+            <Truck className="w-10 h-10 text-white" />
           </div>
-          <CardTitle className="text-2xl">Bolpur Mart</CardTitle>
-          <CardDescription>Delivery Partner Portal</CardDescription>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">
+            Bolpur Mart
+          </CardTitle>
+          <CardDescription className="text-base mt-2">Delivery Partner Portal</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="animate-slide-up border-destructive/50 bg-destructive/5">
+              <AlertDescription className="text-sm">{error}</AlertDescription>
             </Alert>
           )}
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -56,11 +59,13 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                className="h-12 px-4 text-base transition-all focus:ring-2 focus:ring-primary/20"
+                data-testid="input-email"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -69,27 +74,46 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
+                className="h-12 px-4 text-base transition-all focus:ring-2 focus:ring-primary/20"
+                data-testid="input-password"
               />
             </div>
             
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-orange-600 hover:from-primary/90 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
               disabled={loading || !email || !password}
+              data-testid="button-submit"
             >
-              {loading ? "Signing in..." : "🔑 Sign In"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
           
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignup(true)}
-              className="text-sm text-primary hover:underline"
-            >
-              Create an account
-            </button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-muted" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">or</span>
+            </div>
           </div>
+          
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => setIsSignup(true)}
+            className="w-full h-12 text-base hover:bg-primary/5 hover:text-primary hover:border-primary transition-all"
+            data-testid="button-signup"
+          >
+            Create New Account
+          </Button>
         </CardContent>
       </Card>
     </div>

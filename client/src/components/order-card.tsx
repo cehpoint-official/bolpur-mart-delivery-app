@@ -59,66 +59,72 @@ export function OrderCard({
   const timeAgo = getTimeAgo(order.createdAt);
 
   return (
-    <Card className="overflow-hidden" data-testid={`card-order-${order.id}`}>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <Badge className={cn("text-white text-xs font-medium", status.className)}>
+    <Card className="overflow-hidden border-l-4 border-l-primary/50 shadow-sm hover:shadow-md transition-all" data-testid={`card-order-${order.id}`}>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Badge className={cn("text-white text-xs font-semibold px-3 py-1 shadow-sm", status.className)}>
               {status.label}
             </Badge>
-            <span className="text-sm font-medium text-card-foreground" data-testid={`text-order-id-${order.id}`}>
+            <span className="text-xs font-mono text-muted-foreground" data-testid={`text-order-id-${order.id}`}>
               #{order.id.slice(-8)}
             </span>
           </div>
-          <span className="text-sm text-muted-foreground" data-testid={`text-time-${order.id}`}>
+          <span className="text-xs text-muted-foreground font-medium" data-testid={`text-time-${order.id}`}>
             {timeAgo}
           </span>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Store Information */}
-          <div className="flex items-start space-x-3">
-            <div className="w-8 h-8 bg-destructive bg-opacity-10 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-destructive rounded-full"></div>
+          <div className="flex items-start gap-3 p-3 bg-muted rounded-lg border-l-4 border-red-500">
+            <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-4 h-4 bg-red-500 dark:bg-red-400 rounded-full"></div>
             </div>
-            <div className="flex-1">
-              <p className="font-medium text-card-foreground" data-testid={`text-store-name-${order.id}`}>
-                {order.storeName}
-              </p>
-              <p className="text-sm text-muted-foreground" data-testid={`text-store-address-${order.id}`}>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Badge className="bg-red-500 dark:bg-red-600 hover:bg-red-600 text-white text-[10px] px-2 py-0">PICKUP</Badge>
+                <p className="font-bold text-sm text-foreground" data-testid={`text-store-name-${order.id}`}>
+                  {order.storeName}
+                </p>
+              </div>
+              <p className="text-xs text-foreground/80 dark:text-foreground/70 line-clamp-1" data-testid={`text-store-address-${order.id}`}>
                 {order.storeAddress}
               </p>
             </div>
-            <span className="text-sm font-medium text-card-foreground">
+            <Badge variant="outline" className="flex-shrink-0 font-semibold border-foreground/20 text-foreground">
               {order.distance.toFixed(1)} km
-            </span>
+            </Badge>
           </div>
 
           {/* Customer Information */}
-          <div className="flex items-start space-x-3">
-            <div className="w-8 h-8 bg-success bg-opacity-10 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-success rounded-full"></div>
+          <div className="flex items-start gap-3 p-3 bg-muted rounded-lg border-l-4 border-green-600">
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-4 h-4 bg-green-600 dark:bg-green-500 rounded-full"></div>
             </div>
-            <div className="flex-1">
-              <p className="font-medium text-card-foreground" data-testid={`text-customer-name-${order.id}`}>
-                {order.customerName}
-              </p>
-              <p className="text-sm text-muted-foreground" data-testid={`text-customer-address-${order.id}`}>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Badge className="bg-green-600 dark:bg-green-700 hover:bg-green-700 text-white text-[10px] px-2 py-0">DROP</Badge>
+                <p className="font-bold text-sm text-foreground" data-testid={`text-customer-name-${order.id}`}>
+                  {order.customerName}
+                </p>
+              </div>
+              <p className="text-xs text-foreground/80 dark:text-foreground/70 line-clamp-1" data-testid={`text-customer-address-${order.id}`}>
                 {order.customerAddress}
               </p>
             </div>
-            <div className="text-right">
-              <span className="text-sm font-medium text-card-foreground">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Badge variant="outline" className="font-semibold border-foreground/20 text-foreground">
                 {order.deliveryDistance.toFixed(1)} km
-              </span>
+              </Badge>
               {onNavigate && (
                 <Button
                   size="sm"
-                  className="p-2 bg-primary text-primary-foreground rounded-full ml-2"
+                  className="h-9 w-9 p-0 bg-primary hover:bg-primary/90 rounded-full shadow-sm"
                   onClick={onNavigate}
                   data-testid={`button-navigate-${order.id}`}
                 >
-                  <Navigation className="w-3 h-3" />
+                  <Navigation className="w-4 h-4" />
                 </Button>
               )}
             </div>
@@ -126,17 +132,17 @@ export function OrderCard({
         </div>
 
         {/* Order Value and Actions */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-          <div className="flex space-x-4">
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
+          <div className="flex gap-6">
             <div>
-              <p className="text-sm text-muted-foreground">Order Value</p>
-              <p className="font-semibold text-card-foreground" data-testid={`text-order-value-${order.id}`}>
+              <p className="text-xs text-muted-foreground mb-1">Order Value</p>
+              <p className="text-lg font-bold text-foreground" data-testid={`text-order-value-${order.id}`}>
                 ₹{order.orderValue}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Delivery Fee</p>
-              <p className="font-semibold text-success" data-testid={`text-delivery-fee-${order.id}`}>
+              <p className="text-xs text-muted-foreground mb-1">Your Earnings</p>
+              <p className="text-lg font-bold text-green-600 dark:text-green-500" data-testid={`text-delivery-fee-${order.id}`}>
                 ₹{order.deliveryFee}
               </p>
             </div>

@@ -124,40 +124,51 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-4 space-y-4 pb-24">
+    <div className="p-4 space-y-5 pb-24 animate-fade-in">
       {/* Partner Header */}
-      <Card className="bg-gradient-to-r from-primary to-orange-600 text-white">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl font-bold">Welcome, {deliveryPartner.name.split(' ')[0]}!</h2>
-              <Badge variant="secondary" className="mt-1">
+      <Card className="bg-gradient-to-br from-primary via-orange-600 to-orange-700 text-white border-0 shadow-xl overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -ml-12 -mb-12" />
+        
+        <CardContent className="p-6 relative">
+          <div className="flex items-start justify-between mb-6">
+            <div className="space-y-2">
+              <p className="text-sm opacity-90">Welcome back,</p>
+              <h2 className="text-2xl font-bold tracking-tight">
+                {deliveryPartner.name.split(' ')[0]}!
+              </h2>
+              <Badge variant="secondary" className="mt-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
                 {deliveryPartner.status.toUpperCase()}
               </Badge>
             </div>
-            <div className="text-right">
-              <div className="flex items-center space-x-1">
-                <Star className="w-4 h-4 fill-current" />
-                <span className="font-semibold">{deliveryPartner.rating.toFixed(1)}</span>
+            <div className="text-right bg-white/15 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <div className="flex items-center gap-2 mb-1">
+                <Star className="w-5 h-5 fill-yellow-300 text-yellow-300" />
+                <span className="text-2xl font-bold">{deliveryPartner.rating.toFixed(1)}</span>
               </div>
-              <p className="text-sm opacity-90">{deliveryPartner.totalDeliveries} deliveries</p>
+              <p className="text-xs opacity-90">{deliveryPartner.totalDeliveries} deliveries</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-1">
-                <IndianRupee className="w-4 h-4" />
-                <p className="text-sm opacity-90">Today's Earnings</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <IndianRupee className="w-4 h-4" />
+                </div>
+                <p className="text-xs opacity-90 font-medium">Today's Earnings</p>
               </div>
-              <p className="text-2xl font-bold">₹0</p>
+              <p className="text-3xl font-bold tracking-tight">₹0</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-1">
-                <Truck className="w-4 h-4" />
-                <p className="text-sm opacity-90">Deliveries</p>
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Truck className="w-4 h-4" />
+                </div>
+                <p className="text-xs opacity-90 font-medium">Active Now</p>
               </div>
-              <p className="text-2xl font-bold">{activeOrders.length}</p>
+              <p className="text-3xl font-bold tracking-tight">{activeOrders.length}</p>
             </div>
           </div>
         </CardContent>
@@ -171,8 +182,11 @@ export default function DashboardPage() {
 
       {/* Active Orders */}
       {activeOrders.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold">Active Orders ({activeOrders.length})</h3>
+        <div className="space-y-3 animate-slide-up">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold">Active Orders</h3>
+            <Badge className="bg-orange-500">{activeOrders.length}</Badge>
+          </div>
           {activeOrders.map((order) => (
             <OrderCard
               key={order.id}
@@ -187,20 +201,25 @@ export default function DashboardPage() {
       )}
 
       {/* Available Orders */}
-      <div className="space-y-3">
+      <div className="space-y-3 animate-slide-up">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Available Orders ({availableOrders.length})</h3>
-          {loading && (
-            <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></div>
-          )}
+          <h3 className="text-lg font-bold">Available Orders</h3>
+          <div className="flex items-center gap-2">
+            {loading && (
+              <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></div>
+            )}
+            <Badge variant="outline">{availableOrders.length}</Badge>
+          </div>
         </div>
         
         {availableOrders.length === 0 && !loading ? (
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Truck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No orders available at the moment</p>
-              <p className="text-sm text-muted-foreground mt-1">New orders will appear here</p>
+          <Card className="border-dashed border-2">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <Truck className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="font-medium text-foreground">All caught up!</p>
+              <p className="text-sm text-muted-foreground mt-1">New orders will appear here when available</p>
             </CardContent>
           </Card>
         ) : (

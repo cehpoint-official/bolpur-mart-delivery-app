@@ -105,33 +105,37 @@ export default function History() {
   }
 
   return (
-    <div className="p-4 space-y-4 pb-24">
+    <div className="p-4 space-y-5 pb-24 animate-fade-in">
       {/* Earnings Summary */}
-      <div className="bg-gradient-to-r from-primary to-orange-600 text-white p-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">
-          {activeFilter === "today" ? "Today's" : activeFilter === "week" ? "Weekly" : "Monthly"} Summary
-        </h3>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold" data-testid="text-total-earnings">
-              ₹{totalEarnings}
-            </p>
-            <p className="text-sm opacity-90">Total Earned</p>
+      <Card className="bg-gradient-to-br from-primary via-orange-600 to-orange-700 text-white border-0 shadow-xl overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+        <CardContent className="p-6 relative">
+          <h3 className="text-sm opacity-90 mb-1">
+            {activeFilter === "today" ? "Today's" : activeFilter === "week" ? "This Week's" : "This Month's"}
+          </h3>
+          <h2 className="text-2xl font-bold mb-6">Performance Summary</h2>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20">
+              <p className="text-3xl font-bold mb-1" data-testid="text-total-earnings">
+                ₹{totalEarnings}
+              </p>
+              <p className="text-xs opacity-90 font-medium">Earned</p>
+            </div>
+            <div className="text-center bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20">
+              <p className="text-3xl font-bold mb-1" data-testid="text-total-deliveries">
+                {filteredHistory.length}
+              </p>
+              <p className="text-xs opacity-90 font-medium">Deliveries</p>
+            </div>
+            <div className="text-center bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20">
+              <p className="text-3xl font-bold mb-1" data-testid="text-average-rating">
+                {averageRating.toFixed(1)}
+              </p>
+              <p className="text-xs opacity-90 font-medium">Rating</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold" data-testid="text-total-deliveries">
-              {filteredHistory.length}
-            </p>
-            <p className="text-sm opacity-90">Deliveries</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold" data-testid="text-average-rating">
-              {averageRating.toFixed(1)}
-            </p>
-            <p className="text-sm opacity-90">Rating</p>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Filter Tabs */}
       <Card>
