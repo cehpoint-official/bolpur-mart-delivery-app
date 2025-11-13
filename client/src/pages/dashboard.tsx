@@ -28,13 +28,13 @@ export default function DashboardPage() {
     try {
       await acceptOrder(orderId, deliveryPartner.id);
       toast({
-        title: "Order accepted!",
-        description: "You can now pick up the order",
+        title: "Order Le Liya! ✅",
+        description: "Ab shop se order pickup karo",
       });
     } catch (error) {
       toast({
-        title: "Failed to accept order",
-        description: "Please try again",
+        title: "Order Nahi Mila ❌",
+        description: "Phir se try karo",
         variant: "destructive",
       });
     }
@@ -44,13 +44,13 @@ export default function DashboardPage() {
     try {
       await declineOrder(orderId);
       toast({
-        title: "Order declined",
-        description: "The order has been removed from your list",
+        title: "Order Chhod Diya",
+        description: "Order list se hata diya gaya",
       });
     } catch (error) {
       toast({
-        title: "Failed to decline order",
-        description: "Please try again",
+        title: "Kuch Gadbad Hui",
+        description: "Phir se try karo",
         variant: "destructive",
       });
     }
@@ -60,13 +60,13 @@ export default function DashboardPage() {
     try {
       await markAsPickedUp(orderId);
       toast({
-        title: "Order marked as picked up",
-        description: "Now on the way to customer",
+        title: "Pickup Ho Gaya! 📦",
+        description: "Ab customer ko deliver karo",
       });
     } catch (error) {
       toast({
-        title: "Failed to update status",
-        description: "Please try again",
+        title: "Status Update Nahi Hua",
+        description: "Phir se try karo",
         variant: "destructive",
       });
     }
@@ -78,13 +78,13 @@ export default function DashboardPage() {
     try {
       await markAsDelivered(orderId, deliveryPartner.id);
       toast({
-        title: "Order delivered!",
-        description: "Great job! Your earnings have been updated",
+        title: "Deliver Ho Gaya! 🎉",
+        description: "Bahut badhiya! Paisa aapke account mein add ho gaya",
       });
     } catch (error) {
       toast({
-        title: "Failed to mark as delivered",
-        description: "Please try again",
+        title: "Delivered Mark Nahi Hua",
+        description: "Phir se try karo",
         variant: "destructive",
       });
     }
@@ -104,7 +104,7 @@ export default function DashboardPage() {
       <div className="p-4">
         <Alert variant="destructive">
           <AlertDescription>
-            Unable to load delivery partner information. Please contact support if this persists.
+            Aapka data load nahi ho raha. Support se contact karo.
           </AlertDescription>
         </Alert>
       </div>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
       <div className="p-4">
         <Alert>
           <AlertDescription>
-            Your account is pending admin approval. You'll be able to accept orders once approved.
+            Aapka account abhi pending hai. Admin approve karne ke baad order milega.
           </AlertDescription>
         </Alert>
       </div>
@@ -133,13 +133,13 @@ export default function DashboardPage() {
         <CardContent className="p-6 relative">
           <div className="flex items-start justify-between mb-6">
             <div className="space-y-2">
-              <p className="text-sm opacity-90">Welcome back,</p>
+              <p className="text-sm opacity-90">Namaste,</p>
               <h2 className="text-2xl font-bold tracking-tight">
                 {deliveryPartner.name.split(' ')[0]}!
               </h2>
               <Badge variant="secondary" className="mt-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
-                {deliveryPartner.status.toUpperCase()}
+                {deliveryPartner.status === 'active' ? 'ACTIVE HAI' : 'OFF HAI'}
               </Badge>
             </div>
             <div className="text-right bg-white/15 backdrop-blur-sm rounded-xl p-3 border border-white/20">
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                 <Star className="w-5 h-5 fill-yellow-300 text-yellow-300" />
                 <span className="text-2xl font-bold">{deliveryPartner.rating.toFixed(1)}</span>
               </div>
-              <p className="text-xs opacity-90">{deliveryPartner.totalDeliveries} deliveries</p>
+              <p className="text-xs opacity-90">{deliveryPartner.totalDeliveries} Delivery</p>
             </div>
           </div>
           
@@ -157,7 +157,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                   <IndianRupee className="w-4 h-4" />
                 </div>
-                <p className="text-xs opacity-90 font-medium">Today's Earnings</p>
+                <p className="text-xs opacity-90 font-medium">Aaj Kamaya</p>
               </div>
               <p className="text-3xl font-bold tracking-tight">₹0</p>
             </div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                   <Truck className="w-4 h-4" />
                 </div>
-                <p className="text-xs opacity-90 font-medium">Active Now</p>
+                <p className="text-xs opacity-90 font-medium">Chal Raha</p>
               </div>
               <p className="text-3xl font-bold tracking-tight">{activeOrders.length}</p>
             </div>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
       {activeOrders.length > 0 && (
         <div className="space-y-3 animate-slide-up">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold">Active Orders</h3>
+            <h3 className="text-lg font-bold">🚚 Abhi Deliver Karo</h3>
             <Badge className="bg-orange-500">{activeOrders.length}</Badge>
           </div>
           {activeOrders.map((order) => (
@@ -203,7 +203,7 @@ export default function DashboardPage() {
       {/* Available Orders */}
       <div className="space-y-3 animate-slide-up">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold">Available Orders</h3>
+          <h3 className="text-lg font-bold">📦 Naye Orders</h3>
           <div className="flex items-center gap-2">
             {loading && (
               <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></div>
@@ -218,8 +218,8 @@ export default function DashboardPage() {
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Truck className="w-8 h-8 text-muted-foreground" />
               </div>
-              <p className="font-medium text-foreground">All caught up!</p>
-              <p className="text-sm text-muted-foreground mt-1">New orders will appear here when available</p>
+              <p className="font-medium text-foreground">Koi Order Nahi Hai</p>
+              <p className="text-sm text-muted-foreground mt-1">Naya order aane par yahan dikhega</p>
             </CardContent>
           </Card>
         ) : (

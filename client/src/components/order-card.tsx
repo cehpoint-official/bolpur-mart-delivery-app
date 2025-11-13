@@ -19,27 +19,27 @@ interface OrderCardProps {
 
 const statusConfig = {
   new: {
-    label: "NEW",
+    label: "NAYA",
     className: "bg-blue-500 hover:bg-blue-600",
   },
   accepted: {
-    label: "PICKUP",
+    label: "PICKUP KARO",
     className: "bg-warning hover:bg-warning/90",
   },
   picked_up: {
-    label: "EN ROUTE",
+    label: "RAASTE MEIN",
     className: "bg-purple-500 hover:bg-purple-600",
   },
   en_route: {
-    label: "EN ROUTE",
+    label: "RAASTE MEIN",
     className: "bg-purple-500 hover:bg-purple-600",
   },
   delivered: {
-    label: "DELIVERED",
+    label: "HO GAYA",
     className: "bg-success hover:bg-success/90",
   },
   cancelled: {
-    label: "CANCELLED",
+    label: "CANCEL",
     className: "bg-destructive hover:bg-destructive/90",
   },
 };
@@ -83,7 +83,7 @@ export function OrderCard({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <Badge className="bg-red-500 dark:bg-red-600 hover:bg-red-600 text-white text-[10px] px-2 py-0">PICKUP</Badge>
+                <Badge className="bg-red-500 dark:bg-red-600 hover:bg-red-600 text-white text-[10px] px-2 py-0">LENE JAYO</Badge>
                 <p className="font-bold text-sm text-foreground" data-testid={`text-store-name-${order.id}`}>
                   {order.storeName}
                 </p>
@@ -104,7 +104,7 @@ export function OrderCard({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <Badge className="bg-green-600 dark:bg-green-700 hover:bg-green-700 text-white text-[10px] px-2 py-0">DROP</Badge>
+                <Badge className="bg-green-600 dark:bg-green-700 hover:bg-green-700 text-white text-[10px] px-2 py-0">DENE JAYO</Badge>
                 <p className="font-bold text-sm text-foreground" data-testid={`text-customer-name-${order.id}`}>
                   {order.customerName}
                 </p>
@@ -135,13 +135,13 @@ export function OrderCard({
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
           <div className="flex gap-6">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Order Value</p>
+              <p className="text-xs text-muted-foreground mb-1">Order Ki Value</p>
               <p className="text-lg font-bold text-foreground" data-testid={`text-order-value-${order.id}`}>
                 ₹{order.orderValue}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Your Earnings</p>
+              <p className="text-xs text-muted-foreground mb-1">Aapko Milega</p>
               <p className="text-lg font-bold text-green-600 dark:text-green-500" data-testid={`text-delivery-fee-${order.id}`}>
                 ₹{order.deliveryFee}
               </p>
@@ -159,7 +159,7 @@ export function OrderCard({
                     onClick={onDecline}
                     data-testid={`button-decline-${order.id}`}
                   >
-                    Decline
+                    Nahi
                   </Button>
                 )}
                 {onAccept && (
@@ -168,7 +168,7 @@ export function OrderCard({
                     onClick={onAccept}
                     data-testid={`button-accept-${order.id}`}
                   >
-                    Accept
+                    Haan, Lelo
                   </Button>
                 )}
               </>
@@ -184,7 +184,7 @@ export function OrderCard({
                     data-testid={`button-pickup-${order.id}`}
                   >
                     <Package className="w-4 h-4 mr-2" />
-                    Mark as Picked Up
+                    Pickup Kiya
                   </Button>
                 )}
                 {onCall && (
@@ -210,7 +210,7 @@ export function OrderCard({
                     data-testid={`button-delivered-${order.id}`}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Mark as Delivered
+                    Deliver Kiya
                   </Button>
                 )}
                 {onCall && (
@@ -246,12 +246,12 @@ function getTimeAgo(date: Date): string {
   const now = new Date();
   const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
   
-  if (diffInMinutes < 1) return "Just now";
-  if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+  if (diffInMinutes < 1) return "Abhi-Abhi";
+  if (diffInMinutes < 60) return `${diffInMinutes} min pehle`;
   
   const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+  if (diffInHours < 24) return `${diffInHours} ghante pehle`;
   
   const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+  return `${diffInDays} din pehle`;
 }

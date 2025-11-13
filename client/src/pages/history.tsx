@@ -83,13 +83,16 @@ export default function History() {
 
   const getTimeAgo = (date: Date) => {
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
-    if (diffInHours < 1) return "Less than an hour ago";
-    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    if (diffInMinutes < 1) return "Abhi-Abhi";
+    if (diffInMinutes < 60) return `${diffInMinutes} min pehle`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} ghante pehle`;
     
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    return `${diffInDays} din pehle`;
   };
 
   if (!deliveryPartner) {
@@ -97,7 +100,7 @@ export default function History() {
       <div className="p-4">
         <Alert variant="destructive">
           <AlertDescription>
-            Unable to load delivery partner information. Please contact support.
+            Aapka data load nahi ho raha. Support se contact karo.
           </AlertDescription>
         </Alert>
       </div>
@@ -111,27 +114,27 @@ export default function History() {
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
         <CardContent className="p-6 relative">
           <h3 className="text-sm opacity-90 mb-1">
-            {activeFilter === "today" ? "Today's" : activeFilter === "week" ? "This Week's" : "This Month's"}
+            {activeFilter === "today" ? "Aaj Ka" : activeFilter === "week" ? "Is Hafte Ka" : "Is Mahine Ka"}
           </h3>
-          <h2 className="text-2xl font-bold mb-6">Performance Summary</h2>
+          <h2 className="text-2xl font-bold mb-6">Aapka Record</h2>
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20">
               <p className="text-3xl font-bold mb-1" data-testid="text-total-earnings">
                 ₹{totalEarnings}
               </p>
-              <p className="text-xs opacity-90 font-medium">Earned</p>
+              <p className="text-xs opacity-90 font-medium">Kamaya</p>
             </div>
             <div className="text-center bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20">
               <p className="text-3xl font-bold mb-1" data-testid="text-total-deliveries">
                 {filteredHistory.length}
               </p>
-              <p className="text-xs opacity-90 font-medium">Deliveries</p>
+              <p className="text-xs opacity-90 font-medium">Delivery</p>
             </div>
             <div className="text-center bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20">
               <p className="text-3xl font-bold mb-1" data-testid="text-average-rating">
                 {averageRating.toFixed(1)}
               </p>
-              <p className="text-xs opacity-90 font-medium">Rating</p>
+              <p className="text-xs opacity-90 font-medium">⭐ Star</p>
             </div>
           </div>
         </CardContent>
@@ -146,11 +149,11 @@ export default function History() {
                 key={period}
                 variant={activeFilter === period ? "default" : "ghost"}
                 size="sm"
-                className="flex-1 capitalize"
+                className="flex-1"
                 onClick={() => setActiveFilter(period)}
                 data-testid={`filter-${period}`}
               >
-                {period}
+                {period === "today" ? "Aaj" : period === "week" ? "Hafta" : "Mahina"}
               </Button>
             ))}
           </div>
@@ -159,13 +162,13 @@ export default function History() {
 
       {/* Delivery History List */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-card-foreground">Delivery History</h3>
+        <h3 className="text-lg font-semibold text-card-foreground">📜 Purane Orders</h3>
         
         {loading ? (
           <Card>
             <CardContent className="p-6 text-center">
               <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-              <p className="text-muted-foreground">Loading history...</p>
+              <p className="text-muted-foreground">Purane orders load ho rahe hain...</p>
             </CardContent>
           </Card>
         ) : filteredHistory.length === 0 ? (
@@ -173,7 +176,7 @@ export default function History() {
             <CardContent className="p-6 text-center">
               <Truck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">
-                No deliveries found for the selected period
+                Is time mein koi delivery nahi hai
               </p>
             </CardContent>
           </Card>
@@ -184,14 +187,14 @@ export default function History() {
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center space-x-2">
                     <Badge className="bg-success text-white">
-                      DELIVERED
+                      HO GAYA ✓
                     </Badge>
                     <span className="text-sm font-medium text-card-foreground">
                       #{order.id.slice(-8)}
                     </span>
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {order.deliveryTime ? getTimeAgo(order.deliveryTime) : "Unknown"}
+                    {order.deliveryTime ? getTimeAgo(order.deliveryTime) : "Pata Nahi"}
                   </span>
                 </div>
                 
@@ -201,11 +204,11 @@ export default function History() {
                       {order.customerName}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Delivered to {order.customerAddress.split(',')[0]}
+                      {order.customerAddress.split(',')[0]} pe deliver kiya
                     </p>
                     {order.deliveryTime && (
                       <p className="text-xs text-muted-foreground">
-                        Completed at {formatTime(order.deliveryTime)}
+                        {formatTime(order.deliveryTime)}
                       </p>
                     )}
                   </div>
