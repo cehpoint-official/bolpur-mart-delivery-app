@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function DashboardPage() {
   const { deliveryPartner } = useAuth();
   const { toast } = useToast();
-  
+
   const {
     availableOrders,
     activeOrders,
@@ -22,9 +22,11 @@ export default function DashboardPage() {
     markAsDelivered,
   } = useOrders(deliveryPartner?.id);
 
+
+
   const handleAcceptOrder = async (orderId: string) => {
     if (!deliveryPartner) return;
-    
+
     try {
       await acceptOrder(orderId, deliveryPartner.id);
       toast({
@@ -74,7 +76,7 @@ export default function DashboardPage() {
 
   const handleMarkDelivered = async (orderId: string) => {
     if (!deliveryPartner) return;
-    
+
     try {
       await markAsDelivered(orderId, deliveryPartner.id);
       toast({
@@ -129,7 +131,7 @@ export default function DashboardPage() {
       <Card className="bg-gradient-to-br from-primary via-orange-600 to-orange-700 text-white border-0 shadow-xl overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -ml-12 -mb-12" />
-        
+
         <CardContent className="p-6 relative">
           <div className="flex items-start justify-between mb-6">
             <div className="space-y-2">
@@ -150,7 +152,7 @@ export default function DashboardPage() {
               <p className="text-xs opacity-90">{deliveryPartner.totalDeliveries} Delivery</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
               <div className="flex items-center gap-2 mb-2">
@@ -211,7 +213,7 @@ export default function DashboardPage() {
             <Badge variant="outline">{availableOrders.length}</Badge>
           </div>
         </div>
-        
+
         {availableOrders.length === 0 && !loading ? (
           <Card className="border-dashed border-2">
             <CardContent className="p-8 text-center">

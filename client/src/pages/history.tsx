@@ -18,11 +18,21 @@ export default function History() {
   const [earnings, setEarnings] = useState<Earnings[]>([]);
   const [loading, setLoading] = useState(false);
 
+  console.log("Delivery History:", deliveryHistory);
+
+  useEffect(() => {
+    if (deliveryPartner?.id) {
+      loadDeliveryHistory(deliveryPartner.id);
+    }
+  }, [deliveryPartner]);
+
+
+
   // Calculate period dates
   const getPeriodDates = (period: FilterPeriod) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     switch (period) {
       case "today":
         return { start: today, end: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
@@ -42,24 +52,34 @@ export default function History() {
   useEffect(() => {
     if (!deliveryPartner) return;
 
+    let isSubscribed = true;
+
     const loadData = async () => {
       setLoading(true);
       try {
         const { start, end } = getPeriodDates(activeFilter);
-        const [_, earningsData] = await Promise.all([
-          loadDeliveryHistory(deliveryPartner.id),
-          getEarnings(deliveryPartner.id, start, end)
-        ]);
-        setEarnings(earningsData);
+
+        const earningsData = await getEarnings(deliveryPartner.id, start, end);
+
+        if (isSubscribed) {
+          setEarnings(earningsData);
+        }
       } catch (error) {
-        // Error loading history data
+        console.error(error);
       } finally {
-        setLoading(false);
+        if (isSubscribed) {
+          setLoading(false);
+        }
       }
     };
 
     loadData();
-  }, [deliveryPartner, activeFilter, loadDeliveryHistory]);
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [deliveryPartner, activeFilter]);
+
 
   // Calculate summary stats
   const totalEarnings = earnings.reduce((sum, earning) => sum + earning.amount, 0);
@@ -75,22 +95,22 @@ export default function History() {
   });
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-IN', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
   const getTimeAgo = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return "Abhi-Abhi";
     if (diffInMinutes < 60) return `${diffInMinutes} min pehle`;
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours} ghante pehle`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays} din pehle`;
   };
@@ -163,7 +183,7 @@ export default function History() {
       {/* Delivery History List */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold text-card-foreground">📜 Purane Orders</h3>
-        
+
         {loading ? (
           <Card>
             <CardContent className="p-6 text-center">
@@ -197,14 +217,14 @@ export default function History() {
                     {order.deliveryTime ? getTimeAgo(order.deliveryTime) : "Pata Nahi"}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-card-foreground" data-testid={`text-customer-${order.id}`}>
                       {order.customerName}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {order.customerAddress.split(',')[0]} pe deliver kiya
+                      {order.customerAddress?.split(',')[0] ?? "Unknown Address"} pe deliver kiya
                     </p>
                     {order.deliveryTime && (
                       <p className="text-xs text-muted-foreground">

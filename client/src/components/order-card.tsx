@@ -4,10 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Phone, Navigation, MessageCircle, Package, CheckCircle } from "lucide-react";
 import type { Order } from "@shared/schema";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 interface OrderCardProps {
   order: Order;
-  onAccept?: () => void;
+  onAccept?: (id: string) => void;
   onDecline?: () => void;
   onMarkPickedUp?: () => void;
   onMarkEnRoute?: () => void;
@@ -44,6 +45,8 @@ const statusConfig = {
   },
 };
 
+
+
 export function OrderCard({
   order,
   onAccept,
@@ -55,8 +58,21 @@ export function OrderCard({
   onMessage,
   onNavigate,
 }: OrderCardProps) {
-  const status = statusConfig[order.status];
+
+  const [isRender, setIsRender] = useState(false);
+  const status = statusConfig[order.status] ?? { label: "UNKNOWN", className: "bg-gray-500" };
   const timeAgo = getTimeAgo(order.createdAt);
+
+  useEffect(() => {
+    console.log(isRender);
+  }, [isRender]);
+
+
+  const totalValue =
+    order.items?.reduce(
+      (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+      0
+    ) ?? 0;
 
   return (
     <Card className="overflow-hidden border-l-4 border-l-primary/50 shadow-sm hover:shadow-md transition-all" data-testid={`card-order-${order.id}`}>
@@ -92,9 +108,14 @@ export function OrderCard({
                 {order.storeAddress}
               </p>
             </div>
-            <Badge variant="outline" className="flex-shrink-0 font-semibold border-foreground/20 text-foreground">
-              {order.distance.toFixed(1)} km
+            <Badge
+              variant="outline"
+              className="flex-shrink-0 font-semibold border-foreground/20 text-foreground"
+            >
+              {order.distance != null ? order.distance.toFixed(1) : "0.0"} km
             </Badge>
+
+
           </div>
 
           {/* Customer Information */}
@@ -114,8 +135,11 @@ export function OrderCard({
               </p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <Badge variant="outline" className="font-semibold border-foreground/20 text-foreground">
-                {order.deliveryDistance.toFixed(1)} km
+              <Badge
+                variant="outline"
+                className="font-semibold border-foreground/20 text-foreground"
+              >
+                {order.deliveryDistance != null ? order.deliveryDistance.toFixed(1) : "0.0"} km
               </Badge>
               {onNavigate && (
                 <Button
@@ -134,12 +158,15 @@ export function OrderCard({
         {/* Order Value and Actions */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
           <div className="flex gap-6">
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Order Ki Value</p>
-              <p className="text-lg font-bold text-foreground" data-testid={`text-order-value-${order.id}`}>
-                ₹{order.orderValue}
-              </p>
-            </div>
+            {order?.paymentMethod == "cash_on_delivery" && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Order Ki Value{isRender && ""}</p>
+                <p className="text-lg font-bold text-foreground" data-testid={`text-order-value-${order.id}`}>
+                  ₹{totalValue}
+                </p>
+              </div>
+            )}
+
             <div>
               <p className="text-xs text-muted-foreground mb-1">Aapko Milega</p>
               <p className="text-lg font-bold text-green-600 dark:text-green-500" data-testid={`text-delivery-fee-${order.id}`}>
@@ -150,7 +177,7 @@ export function OrderCard({
 
           <div className="flex space-x-2">
             {/* Actions based on order status */}
-            {order.status === "new" && (
+            {order.status === "confirmed" && (
               <>
                 {onDecline && (
                   <Button
@@ -165,7 +192,10 @@ export function OrderCard({
                 {onAccept && (
                   <Button
                     size="sm"
-                    onClick={onAccept}
+                    onClick={() => {
+                      setIsRender((prv) => !prv);
+                      onAccept(order.id)
+                    }}
                     data-testid={`button-accept-${order.id}`}
                   >
                     Haan, Lelo
@@ -242,16 +272,18 @@ export function OrderCard({
   );
 }
 
-function getTimeAgo(date: Date): string {
+function getTimeAgo(date: string | Date): string {
+  const d = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
-  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-  
+  const diffInMinutes = Math.floor((now.getTime() - d.getDate()) / (1000 * 60));
+
   if (diffInMinutes < 1) return "Abhi-Abhi";
   if (diffInMinutes < 60) return `${diffInMinutes} min pehle`;
-  
+
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) return `${diffInHours} ghante pehle`;
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   return `${diffInDays} din pehle`;
 }
+

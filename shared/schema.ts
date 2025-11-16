@@ -6,7 +6,7 @@ export const deliveryPartnerSchema = z.object({
   phone: z.string(),
   name: z.string(),
   email: z.string().email().optional(),
-  status: z.enum(['online', 'offline', 'busy']),
+  status: z.enum(["online", "offline", "busy"]),
   vehicleType: z.string(),
   vehicleNumber: z.string(),
   adminApproved: z.boolean(),
@@ -31,29 +31,49 @@ export const orderSchema = z.object({
   customerName: z.string(),
   customerPhone: z.string(),
   customerAddress: z.string(),
+
   storeId: z.string(),
   storeName: z.string(),
   storeAddress: z.string(),
-  items: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    quantity: z.number(),
-    price: z.number(),
-  })),
+
+  items: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      quantity: z.number(),
+      price: z.number(),
+    })
+  ),
+
   orderValue: z.number(),
   deliveryFee: z.number(),
-  status: z.enum(['new', 'accepted', 'picked_up', 'en_route', 'delivered', 'cancelled']),
+
+  status: z.enum([
+    "new",
+    "confirmed",
+    "accepted",
+    "picked_up",
+    "en_route",
+    "delivered",
+    "cancelled",
+  ]),
+
   deliveryPartnerId: z.string().optional(),
+
   pickupTime: z.date().optional(),
   deliveryTime: z.date().optional(),
   estimatedDeliveryTime: z.date().optional(),
+
   customerRating: z.number().min(1).max(5).optional(),
   customerFeedback: z.string().optional(),
+
   distance: z.number(),
   deliveryDistance: z.number(),
+
   createdAt: z.date(),
   updatedAt: z.date(),
 });
+
 
 export const insertOrderSchema = orderSchema.omit({
   id: true,
@@ -71,7 +91,7 @@ export const deliverySchema = z.object({
   endTime: z.date().optional(),
   distance: z.number(),
   customerRating: z.number().min(1).max(5).optional(),
-  status: z.enum(['active', 'completed', 'cancelled']),
+  status: z.enum(["active", "completed", "cancelled"]),
   createdAt: z.date(),
 });
 
@@ -87,7 +107,7 @@ export const earningsSchema = z.object({
   orderId: z.string(),
   amount: z.number(),
   date: z.date(),
-  type: z.enum(['delivery_fee', 'tip', 'bonus']),
+  type: z.enum(["delivery_fee", "tip", "bonus"]),
 });
 
 export const insertEarningsSchema = earningsSchema.omit({

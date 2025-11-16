@@ -5,8 +5,10 @@ import {
   updateOrderStatus,
   getDeliveryHistory,
   addEarnings,
+  createDeliveryRecord,
 } from "@/lib/firestore";
 import type { Order } from "@shared/schema";
+import { Timestamp } from "firebase/firestore";
 
 interface OrdersState {
   availableOrders: Order[];
@@ -41,17 +43,17 @@ export function useOrders(partnerId?: string): OrdersState & OrdersActions {
     setState(prev => ({ ...prev, loading: true }));
 
     const unsubscribeAvailable = getAvailableOrders((orders) => {
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         availableOrders: orders,
-        loading: false 
+        loading: false
       }));
     });
 
     const unsubscribeActive = getPartnerActiveOrders(partnerId, (orders) => {
-      setState(prev => ({ 
-        ...prev, 
-        activeOrders: orders 
+      setState(prev => ({
+        ...prev,
+        activeOrders: orders
       }));
     });
 
@@ -64,6 +66,21 @@ export function useOrders(partnerId?: string): OrdersState & OrdersActions {
   const acceptOrder = async (orderId: string, partnerId: string): Promise<void> => {
     try {
       await updateOrderStatus(orderId, "accepted", partnerId);
+
+      const order = state.availableOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      await createDeliveryRecord({
+        id: crypto.randomUUID(),
+        orderId,
+        deliveryPartnerId: partnerId,
+        earnings: 0,
+        startTime: Timestamp.now(),
+        distance: Number(order.distance ?? 0),
+        status: "active",
+        createdAt: new Date(),
+      });
+
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -72,6 +89,7 @@ export function useOrders(partnerId?: string): OrdersState & OrdersActions {
       throw error;
     }
   };
+
 
   const declineOrder = async (orderId: string): Promise<void> => {
     try {
@@ -117,7 +135,7 @@ export function useOrders(partnerId?: string): OrdersState & OrdersActions {
   const markAsDelivered = async (orderId: string, partnerId: string): Promise<void> => {
     try {
       await updateOrderStatus(orderId, "delivered");
-      
+
       // Find the order to get delivery fee
       const order = state.activeOrders.find(o => o.id === orderId);
       if (order) {
