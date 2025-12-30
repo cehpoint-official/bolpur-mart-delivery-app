@@ -271,7 +271,9 @@ export function OrderCard({
 function getTimeAgo(date: string | Date): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
-  const diffInMinutes = Math.floor((now.getTime() - d.getDate()) / (1000 * 60));
+
+  const diffMs = now.getTime() - d.getTime();
+  const diffInMinutes = Math.floor(diffMs / (1000 * 60));
 
   if (diffInMinutes < 1) return "Abhi-Abhi";
   if (diffInMinutes < 60) return `${diffInMinutes} min pehle`;
@@ -282,4 +284,3 @@ function getTimeAgo(date: string | Date): string {
   const diffInDays = Math.floor(diffInHours / 24);
   return `${diffInDays} din pehle`;
 }
-
