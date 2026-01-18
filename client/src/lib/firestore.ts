@@ -26,6 +26,7 @@ export const COLLECTIONS = {
   ORDERS: "orders",
   DELIVERIES: "deliveries",
   EARNINGS: "earnings",
+  FCM_TOKENS: "fcmTokens",
 } as const;
 
 type DeliveryPartnerForm = {
@@ -370,6 +371,15 @@ export const addEarnings = async (earnings: Omit<Earnings, 'id'>): Promise<void>
   await addDoc(collection(db, COLLECTIONS.EARNINGS), {
     ...earnings,
     date: Timestamp.fromDate(earnings.date),
+  });
+};
+
+export const saveFcmToken = async (userId: string, token: string): Promise<void> => {
+  const tokenRef = doc(db, COLLECTIONS.FCM_TOKENS, userId);
+  await setDoc(tokenRef, {
+    userId,
+    token,
+    updatedAt: serverTimestamp(),
   });
 };
 

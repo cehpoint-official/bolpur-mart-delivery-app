@@ -193,7 +193,7 @@ export default function DashboardPage() {
               </h2>
               <Badge variant="secondary" className="mt-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
-                {deliveryPartner.status === 'active' ? 'ACTIVE HAI' : 'OFF HAI'}
+                {deliveryPartner.status === 'online' ? 'ACTIVE HAI' : 'OFF HAI'}
               </Badge>
             </div>
             <div className="text-right bg-white/15 backdrop-blur-sm rounded-xl p-3 border border-white/20">
@@ -278,8 +278,8 @@ export default function DashboardPage() {
 
                       {n.order && (
                         <div className="text-xs text-gray-600 mt-1">
-                          <p>📍 {n.order.deliveryAddress.fullAddress}</p>
-                          <p>💰 ₹{n.order.total}</p>
+                          <p>📍 {n.order.customerAddress}</p>
+                          <p>💰 ₹{n.order.orderValue}</p>
                           {/* <p>
                             🛍{" "}
                             {n.order.items

@@ -19,6 +19,8 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+export const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+
 // Initialize Firebase Cloud Messaging (only if supported)
 let messaging: any = null;
 isSupported().then((supported) => {

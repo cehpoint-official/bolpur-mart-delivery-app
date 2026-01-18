@@ -23,6 +23,10 @@ const statusConfig = {
     label: "NAYA",
     className: "bg-blue-500 hover:bg-blue-600",
   },
+  confirmed: {
+    label: "CONFIRMED",
+    className: "bg-blue-600 hover:bg-blue-700",
+  },
   accepted: {
     label: "PICKUP KARO",
     className: "bg-warning hover:bg-warning/90",
@@ -271,7 +275,7 @@ export function OrderCard({
 function getTimeAgo(date: string | Date): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
-  const diffInMinutes = Math.floor((now.getTime() - d.getDate()) / (1000 * 60));
+  const diffInMinutes = Math.floor((now.getTime() - d.getTime()) / (1000 * 60));
 
   if (diffInMinutes < 1) return "Abhi-Abhi";
   if (diffInMinutes < 60) return `${diffInMinutes} min pehle`;

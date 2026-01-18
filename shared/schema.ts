@@ -58,6 +58,12 @@ export const orderSchema = z.object({
     "cancelled",
   ]),
 
+  paymentMethod: z.enum(["cash_on_delivery", "online", "wallet"]).optional(),
+  paymentDetails: z.object({
+    verificationStatus: z.string().optional(),
+    verificationDate: z.string().optional(),
+  }).optional(),
+
   deliveryPartnerId: z.string().optional(),
 
   pickupTime: z.date().optional(),
