@@ -50,8 +50,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
-  if (request.method !== 'GET') return;
+  // Skip non-GET requests and non-http/https schemes
+  if (request.method !== 'GET' || !url.protocol.startsWith('http')) return;
 
   // Handle different resource types with appropriate strategies
   if (request.destination === 'image') {
@@ -68,13 +68,13 @@ async function cacheFirst(request, cacheName) {
   try {
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse) {
       // Update cache in background
       updateCache(request, cache);
       return cachedResponse;
     }
-    
+
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
       cache.put(request, networkResponse.clone());
@@ -99,11 +99,11 @@ async function networkFirst(request, cacheName) {
     console.log('Network failed, trying cache:', error);
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     return new Response(JSON.stringify({
       error: 'Offline - No cached data available',
       offline: true
@@ -129,7 +129,7 @@ async function updateCache(request, cache) {
 // Enhanced push notification handling
 self.addEventListener('push', (event) => {
   console.log('Push notification received');
-  
+
   if (!event.data) return;
 
   try {
@@ -180,7 +180,7 @@ self.addEventListener('notificationclick', (event) => {
   const data = notification.data || {};
 
   let urlToOpen = '/';
-  
+
   switch (action) {
     case 'accept':
       urlToOpen = `/?action=accept&orderId=${data.orderId || ''}`;
@@ -214,7 +214,7 @@ self.addEventListener('notificationclick', (event) => {
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
   console.log('Background sync triggered:', event.tag);
-  
+
   switch (event.tag) {
     case 'order-status-sync':
       event.waitUntil(syncOrderStatuses());
@@ -235,7 +235,7 @@ async function syncOrderStatuses() {
   try {
     console.log('Syncing order statuses...');
     const pendingUpdates = await getStoredData('pendingOrderUpdates') || [];
-    
+
     for (const update of pendingUpdates) {
       try {
         await fetch('/api/orders/status', {
@@ -247,7 +247,7 @@ async function syncOrderStatuses() {
         console.log('Failed to sync order update:', error);
       }
     }
-    
+
     await clearStoredData('pendingOrderUpdates');
   } catch (error) {
     console.error('Order status sync failed:', error);
@@ -258,7 +258,7 @@ async function syncLocationUpdates() {
   try {
     console.log('Syncing location updates...');
     const pendingLocations = await getStoredData('pendingLocationUpdates') || [];
-    
+
     for (const location of pendingLocations) {
       try {
         await fetch('/api/location/update', {
@@ -270,7 +270,7 @@ async function syncLocationUpdates() {
         console.log('Failed to sync location:', error);
       }
     }
-    
+
     await clearStoredData('pendingLocationUpdates');
   } catch (error) {
     console.error('Location sync failed:', error);
@@ -304,18 +304,18 @@ async function doBackgroundSync() {
 async function storeData(key, data) {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('BolpurDeliveryDB', 1);
-    
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       const db = request.result;
       const transaction = db.transaction(['cache'], 'readwrite');
       const store = transaction.objectStore('cache');
-      
+
       store.put({ key, data, timestamp: Date.now() });
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
     };
-    
+
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains('cache')) {
@@ -328,14 +328,14 @@ async function storeData(key, data) {
 async function getStoredData(key) {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('BolpurDeliveryDB', 1);
-    
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       const db = request.result;
       const transaction = db.transaction(['cache'], 'readonly');
       const store = transaction.objectStore('cache');
       const getRequest = store.get(key);
-      
+
       getRequest.onsuccess = () => {
         resolve(getRequest.result?.data || null);
       };
@@ -347,13 +347,13 @@ async function getStoredData(key) {
 async function clearStoredData(key) {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('BolpurDeliveryDB', 1);
-    
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       const db = request.result;
       const transaction = db.transaction(['cache'], 'readwrite');
       const store = transaction.objectStore('cache');
-      
+
       store.delete(key);
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);

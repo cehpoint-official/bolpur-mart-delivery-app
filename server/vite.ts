@@ -20,6 +20,9 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  log(`Vite root: ${viteConfig.root}`);
+  log(`Vite envDir: ${viteConfig.envDir}`);
+
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },

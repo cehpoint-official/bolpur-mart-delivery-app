@@ -12,6 +12,16 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+console.log('Environment variables available:', Object.keys(import.meta.env));
+console.log('Firebase Config API Key present:', !!firebaseConfig.apiKey);
+if (!firebaseConfig.apiKey) {
+  console.error('Firebase API Key is missing! Check environment variables.');
+  console.log('Full Env Object (redacted):', Object.keys(import.meta.env).reduce((acc: any, key) => {
+    acc[key] = key.includes('KEY') || key.includes('ID') ? '***' : import.meta.env[key];
+    return acc;
+  }, {}));
+}
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
