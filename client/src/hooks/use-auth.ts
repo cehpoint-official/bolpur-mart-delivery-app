@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { signIn, signOutUser, getAuthErrorMessage, type AuthError } from "@/lib/auth";
-import { getDeliveryPartner } from "@/lib/firestore";
+import { subscribeDeliveryPartner } from "@/lib/firestore";
 import type { DeliveryPartner } from "@shared/schema";
+
+console.log("use-auth.ts version 2.2 (Emergency Fix)");
 
 interface AuthState {
   user: User | null;
@@ -27,24 +29,27 @@ export function useAuth(): AuthState & AuthActions {
   });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribePartner: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      // Clean up previous partner listener if any
+      if (unsubscribePartner) {
+        unsubscribePartner();
+        unsubscribePartner = null;
+      }
+
       if (user) {
-        try {
-          const deliveryPartner = await getDeliveryPartner(user.uid);
+        setState(prev => ({ ...prev, user, loading: true }));
+
+        // Listen to live updates of the delivery partner profile
+        unsubscribePartner = subscribeDeliveryPartner(user.uid, (partner) => {
           setState({
             user,
-            deliveryPartner,
+            deliveryPartner: partner,
             loading: false,
             error: null,
           });
-        } catch (error) {
-          setState({
-            user,
-            deliveryPartner: null,
-            loading: false,
-            error: "Failed to load delivery partner data",
-          });
-        }
+        });
       } else {
         setState({
           user: null,
@@ -55,12 +60,14 @@ export function useAuth(): AuthState & AuthActions {
       }
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribePartner) unsubscribePartner();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-    
     try {
       await signIn(email, password);
     } catch (error) {
@@ -75,10 +82,8 @@ export function useAuth(): AuthState & AuthActions {
 
   const logout = async (): Promise<void> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-    
     try {
       await signOutUser();
-      // User state will be updated via onAuthStateChanged
     } catch (error) {
       setState(prev => ({
         ...prev,

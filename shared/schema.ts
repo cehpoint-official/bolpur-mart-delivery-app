@@ -76,6 +76,11 @@ export const orderSchema = z.object({
   distance: z.number(),
   deliveryDistance: z.number(),
 
+  storeLat: z.number().optional(),
+  storeLng: z.number().optional(),
+  customerLat: z.number().optional(),
+  customerLng: z.number().optional(),
+
   createdAt: z.date(),
   updatedAt: z.date(),
 });

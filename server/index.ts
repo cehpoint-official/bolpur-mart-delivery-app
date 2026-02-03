@@ -65,11 +65,10 @@ app.use((req, res, next) => {
   server.listen(
     {
       port,
-      host: "127.0.0.1"   // localhost only
-
+      host: "0.0.0.0",
     },
     () => {
-      log(`serving on http://127.0.0.1:${port}`);
+      log(`serving on http://localhost:${port}`);
     }
   );
 })();

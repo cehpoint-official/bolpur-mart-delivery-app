@@ -20,6 +20,11 @@ function AppContent() {
   const { user, loading } = useAuth();
   const [activePage, setActivePage] = useState<Page>("dashboard");
 
+  console.log("App initialized. API KEY present:", !!import.meta.env.VITE_FIREBASE_API_KEY);
+  if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+    console.error("CRITICAL: VITE_FIREBASE_API_KEY is missing in App.tsx!");
+  }
+
   useEffect(() => {
     if (user && messaging) {
       const setupNotifications = async () => {

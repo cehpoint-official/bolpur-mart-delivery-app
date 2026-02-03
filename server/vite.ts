@@ -20,8 +20,13 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
-  log(`Vite root: ${viteConfig.root}`);
-  log(`Vite envDir: ${viteConfig.envDir}`);
+  const mode = app.get("env") || "development";
+  const resolvedViteConfig = typeof viteConfig === "function"
+    ? await (viteConfig as any)({ mode, command: "serve" })
+    : viteConfig;
+
+  log(`Vite root: ${resolvedViteConfig.root}`);
+  log(`Vite envDir: ${resolvedViteConfig.envDir}`);
 
   const serverOptions = {
     middlewareMode: true,
@@ -30,7 +35,7 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   const vite = await createViteServer({
-    ...viteConfig,
+    ...resolvedViteConfig,
     configFile: false,
     customLogger: {
       ...viteLogger,

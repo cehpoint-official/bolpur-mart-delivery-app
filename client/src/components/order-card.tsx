@@ -1,24 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Phone, Navigation, MessageCircle, Package, CheckCircle } from "lucide-react";
+import { Phone, Navigation, MessageCircle, Package, CheckCircle, MapPin } from "lucide-react";
 import type { Order } from "@shared/schema";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
+import { calculateDistance, calculateSuggestedFee } from "@/lib/location-utils";
+import { MapView } from "./map-view";
 
 interface OrderCardProps {
   order: Order;
+  currentLocation?: { lat: number; lng: number };
   onAccept?: () => void;
   onDecline?: () => void;
   onMarkPickedUp?: () => void;
   onMarkEnRoute?: () => void;
-  onMarkDelivered?: () => void;
+  onMarkDelivered?: (amount: number) => void;
   onCall?: () => void;
   onMessage?: () => void;
   onNavigate?: () => void;
 }
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   new: {
     label: "NAYA",
     className: "bg-blue-500 hover:bg-blue-600",
@@ -49,10 +52,9 @@ const statusConfig = {
   },
 };
 
-
-
 export function OrderCard({
   order,
+  currentLocation: currentLoc,
   onAccept,
   onDecline,
   onMarkPickedUp,
@@ -62,12 +64,34 @@ export function OrderCard({
   onMessage,
   onNavigate,
 }: OrderCardProps) {
-
+  const [showMap, setShowMap] = useState(false);
   const status = statusConfig[order.status] ?? { label: "UNKNOWN", className: "bg-gray-500" };
   const timeAgo = getTimeAgo(order.createdAt);
 
+  // Fallback coordinates for Bolpur center if data is missing
+  const BOLPUR = { lat: 23.6681, lng: 87.6837 };
+  const storePos = {
+    lat: order.storeLat || BOLPUR.lat,
+    lng: order.storeLng || BOLPUR.lng
+  };
+  const customerPos = {
+    lat: order.customerLat || (BOLPUR.lat + 0.01),
+    lng: order.customerLng || (BOLPUR.lng + 0.01)
+  };
 
+  const pickupDistance = useMemo(() => {
+    if (!currentLoc) return order.distance || 1.5; // Demo fallback
+    return calculateDistance(currentLoc.lat, currentLoc.lng, storePos.lat, storePos.lng);
+  }, [currentLoc, storePos, order.distance]);
 
+  const deliveryDistance = useMemo(() => {
+    return calculateDistance(storePos.lat, storePos.lng, customerPos.lat, customerPos.lng);
+  }, [storePos, customerPos]);
+
+  const dynamicFee = useMemo(() => {
+    const totalDist = pickupDistance + deliveryDistance;
+    return calculateSuggestedFee(totalDist);
+  }, [pickupDistance, deliveryDistance]);
 
   const totalValue =
     order.items?.reduce(
@@ -76,18 +100,18 @@ export function OrderCard({
     ) ?? 0;
 
   return (
-    <Card className="overflow-hidden border-l-4 border-l-primary/50 shadow-sm hover:shadow-md transition-all" data-testid={`card-order-${order.id}`}>
+    <Card className="overflow-hidden border-l-4 border-l-primary/50 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
             <Badge className={cn("text-white text-xs font-semibold px-3 py-1 shadow-sm", status.className)}>
               {status.label}
             </Badge>
-            <span className="text-xs font-mono text-muted-foreground" data-testid={`text-order-id-${order.id}`}>
+            <span className="text-xs font-mono text-muted-foreground">
               #{order.id.slice(-8)}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground font-medium" data-testid={`text-time-${order.id}`}>
+          <span className="text-xs text-muted-foreground font-medium">
             {timeAgo}
           </span>
         </div>
@@ -96,16 +120,16 @@ export function OrderCard({
           {/* Store Information */}
           <div className="flex items-start gap-3 p-3 bg-muted rounded-lg border-l-4 border-red-500">
             <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center flex-shrink-0">
-              <div className="w-4 h-4 bg-red-500 dark:bg-red-400 rounded-full"></div>
+              <MapPin className="w-5 h-5 text-red-500" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <Badge className="bg-red-500 dark:bg-red-600 hover:bg-red-600 text-white text-[10px] px-2 py-0">LENE JAYO</Badge>
-                <p className="font-bold text-sm text-foreground" data-testid={`text-store-name-${order.id}`}>
+                <p className="font-bold text-sm text-foreground">
                   {order.storeName}
                 </p>
               </div>
-              <p className="text-xs text-foreground/80 dark:text-foreground/70 line-clamp-1" data-testid={`text-store-address-${order.id}`}>
+              <p className="text-xs text-foreground/80 dark:text-foreground/70 line-clamp-1">
                 {order.storeAddress}
               </p>
             </div>
@@ -113,25 +137,23 @@ export function OrderCard({
               variant="outline"
               className="flex-shrink-0 font-semibold border-foreground/20 text-foreground"
             >
-              {order.distance != null ? order.distance.toFixed(1) : "0.0"} km
+              {pickupDistance.toFixed(1)} km
             </Badge>
-
-
           </div>
 
           {/* Customer Information */}
           <div className="flex items-start gap-3 p-3 bg-muted rounded-lg border-l-4 border-green-600">
             <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
-              <div className="w-4 h-4 bg-green-600 dark:bg-green-500 rounded-full"></div>
+              <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <Badge className="bg-green-600 dark:bg-green-700 hover:bg-green-700 text-white text-[10px] px-2 py-0">DENE JAYO</Badge>
-                <p className="font-bold text-sm text-foreground" data-testid={`text-customer-name-${order.id}`}>
+                <p className="font-bold text-sm text-foreground">
                   {order.customerName}
                 </p>
               </div>
-              <p className="text-xs text-foreground/80 dark:text-foreground/70 line-clamp-1" data-testid={`text-customer-address-${order.id}`}>
+              <p className="text-xs text-foreground/80 dark:text-foreground/70 line-clamp-1">
                 {order.customerAddress}
               </p>
             </div>
@@ -140,29 +162,48 @@ export function OrderCard({
                 variant="outline"
                 className="font-semibold border-foreground/20 text-foreground"
               >
-                {order.deliveryDistance != null ? order.deliveryDistance.toFixed(1) : "0.0"} km
+                {deliveryDistance.toFixed(1)} km
               </Badge>
               {onNavigate && (
                 <Button
                   size="sm"
                   className="h-9 w-9 p-0 bg-primary hover:bg-primary/90 rounded-full shadow-sm"
                   onClick={onNavigate}
-                  data-testid={`button-navigate-${order.id}`}
                 >
                   <Navigation className="w-4 h-4" />
                 </Button>
               )}
             </div>
           </div>
+
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs gap-2 py-4"
+              onClick={() => setShowMap(!showMap)}
+            >
+              <Navigation className="w-3 h-3" />
+              {showMap ? "Map Chhupao" : "Map Par Dekho"}
+            </Button>
+
+            {showMap && (
+              <MapView
+                storeLoc={storePos}
+                customerLoc={customerPos}
+                partnerLoc={currentLoc || undefined}
+              />
+            )}
+          </div>
         </div>
 
         {/* Order Value and Actions */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
           <div className="flex gap-6">
-            {order?.paymentMethod == "cash_on_delivery" && (
+            {order?.paymentMethod === "cash_on_delivery" && (
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Order Ki Value</p>
-                <p className="text-lg font-bold text-foreground" data-testid={`text-order-value-${order.id}`}>
+                <p className="text-lg font-bold text-foreground">
                   ₹{totalValue}
                 </p>
               </div>
@@ -170,34 +211,22 @@ export function OrderCard({
 
             <div>
               <p className="text-xs text-muted-foreground mb-1">Aapko Milega</p>
-              <p className="text-lg font-bold text-green-600 dark:text-green-500" data-testid={`text-delivery-fee-${order.id}`}>
-                ₹{order.deliveryFee}
+              <p className="text-lg font-bold text-green-600 dark:text-green-500">
+                ₹{dynamicFee}
               </p>
             </div>
           </div>
 
           <div className="flex space-x-2">
-            {/* Actions based on order status */}
             {order.status === "confirmed" && (
               <>
                 {onDecline && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onDecline}
-                    data-testid={`button-decline-${order.id}`}
-                  >
+                  <Button variant="outline" size="sm" onClick={onDecline}>
                     Nahi
                   </Button>
                 )}
                 {onAccept && (
-                  <Button
-                    size="sm"
-                    onClick={
-                      onAccept
-                    }
-                    data-testid={`button-accept-${order.id}`}
-                  >
+                  <Button size="sm" onClick={onAccept}>
                     Haan, Lelo
                   </Button>
                 )}
@@ -211,19 +240,13 @@ export function OrderCard({
                     className="bg-warning text-white hover:bg-warning/90"
                     size="sm"
                     onClick={onMarkPickedUp}
-                    data-testid={`button-pickup-${order.id}`}
                   >
                     <Package className="w-4 h-4 mr-2" />
                     Pickup Kiya
                   </Button>
                 )}
                 {onCall && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onCall}
-                    data-testid={`button-call-store-${order.id}`}
-                  >
+                  <Button variant="outline" size="sm" onClick={onCall}>
                     <Phone className="w-4 h-4" />
                   </Button>
                 )}
@@ -236,30 +259,19 @@ export function OrderCard({
                   <Button
                     className="bg-success text-white hover:bg-success/90"
                     size="sm"
-                    onClick={onMarkDelivered}
-                    data-testid={`button-delivered-${order.id}`}
+                    onClick={() => onMarkDelivered(dynamicFee)}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Deliver Kiya
                   </Button>
                 )}
                 {onCall && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onCall}
-                    data-testid={`button-call-customer-${order.id}`}
-                  >
+                  <Button variant="outline" size="sm" onClick={onCall}>
                     <Phone className="w-4 h-4" />
                   </Button>
                 )}
                 {onMessage && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onMessage}
-                    data-testid={`button-message-${order.id}`}
-                  >
+                  <Button variant="outline" size="sm" onClick={onMessage}>
                     <MessageCircle className="w-4 h-4" />
                   </Button>
                 )}
@@ -286,4 +298,3 @@ function getTimeAgo(date: string | Date): string {
   const diffInDays = Math.floor(diffInHours / 24);
   return `${diffInDays} din pehle`;
 }
-

@@ -23,7 +23,7 @@ interface OrdersActions {
   declineOrder: (orderId: string) => Promise<void>;
   markAsPickedUp: (orderId: string) => Promise<void>;
   markAsEnRoute: (orderId: string) => Promise<void>;
-  markAsDelivered: (orderId: string, partnerId: string) => Promise<void>;
+  markAsDelivered: (orderId: string, partnerId: string, amount?: number) => Promise<void>;
   loadDeliveryHistory: (partnerId: string) => Promise<void>;
   clearError: () => void;
 }
@@ -157,9 +157,9 @@ export function useOrders(partnerId?: string): OrdersState & OrdersActions {
     }
   };
 
-  const markAsDelivered = async (orderId: string, partnerId: string): Promise<void> => {
+  const markAsDelivered = async (orderId: string, partnerId: string, amount?: number): Promise<void> => {
     try {
-      await updateOrderStatus(orderId, "delivered");
+      await updateOrderStatus(orderId, "delivered", partnerId);
 
       // Find the order to get delivery fee
       const order = state.activeOrders.find(o => o.id === orderId);
@@ -168,7 +168,7 @@ export function useOrders(partnerId?: string): OrdersState & OrdersActions {
         await addEarnings({
           deliveryPartnerId: partnerId,
           orderId,
-          amount: order.deliveryFee,
+          amount: amount !== undefined ? amount : order.deliveryFee,
           date: new Date(),
           type: "delivery_fee",
         });

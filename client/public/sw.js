@@ -53,6 +53,11 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests and non-http/https schemes
   if (request.method !== 'GET' || !url.protocol.startsWith('http')) return;
 
+  // Bypass for localhost to avoid issues during development
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    return;
+  }
+
   // Handle different resource types with appropriate strategies
   if (request.destination === 'image') {
     event.respondWith(cacheFirst(request, DYNAMIC_CACHE));
