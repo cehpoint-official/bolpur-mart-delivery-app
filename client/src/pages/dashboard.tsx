@@ -192,7 +192,7 @@ export default function DashboardPage() {
   };
 
   const navigateToAddress = (address: string, storeAddress?: string) => {
-    const dest = encodeURIComponent(address || "Bolpur, West Bengal");
+    const dest = encodeURIComponent(address || "Delivery Area");
     const origin = storeAddress ? `&origin=${encodeURIComponent(storeAddress)}` : "";
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${dest}${origin}`, '_blank');
   };
