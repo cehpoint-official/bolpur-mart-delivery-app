@@ -180,7 +180,7 @@ export default function Profile() {
 
       {/* App Info */}
       <div className="mt-8 pt-6 border-t border-border text-center">
-        <p className="text-sm text-muted-foreground mb-1">Bolpur Mart Delivery</p>
+        <p className="text-sm text-muted-foreground mb-1">ErrandMagics Delivery Partner</p>
         <p className="text-xs text-muted-foreground">Version 1.0.0</p>
       </div>
     </div>

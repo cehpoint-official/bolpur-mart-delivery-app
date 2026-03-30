@@ -33,11 +33,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-orange-50 to-primary/5 p-4">
       <Card className="w-full max-w-md shadow-xl border-0 animate-fade-in">
         <CardHeader className="text-center pb-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transform hover:scale-105 transition-transform">
-            <Truck className="w-10 h-10 text-white" />
+          <div className="mx-auto mb-6">
+            <img src="/errand-magics-logo.png" alt="ErrandMagics Logo" className="h-16 w-auto mx-auto" />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">
-            Bolpur Mart
+            ErrandMagics
           </CardTitle>
           <CardDescription className="text-base mt-2">Delivery Partner Portal</CardDescription>
         </CardHeader>
